@@ -1,6 +1,8 @@
 import java.time.LocalDateTime
 import java.util.Date
 
+import org.json4s.JsonAST.JValue
+
 case class Result(
                    submittedAt: LocalDateTime,
                    subjectId: String,
@@ -11,7 +13,7 @@ case class Result(
 
 case class Content(
                   timestamps: List[TimestampItem],
-                  surveys: List[SurveyItem],
+                  surveys: List[List[SurveyItem]],
                   profile: ProfileItem,
                   feedbacks: List[FeedbackItem]
                   )
