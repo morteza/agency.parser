@@ -45,7 +45,8 @@ object Main extends App {
   var sb = StringBuilder.newBuilder
 
   sb append """name,phone,device_id,intro,harvard,oakley,q10001,q10002,q10003,q10004,q10005,q10006,q10007,q10008,q10009,"""
-  sb append """q20001,q20002,q20003,q20004,q20005,q20006,q20007,q20008,q20009,q20010,q20011,q20012,"""
+  sb append """q20001,q20002,q20102,q20003,q20103,q20004,q20104,q20005,q20105,q20006,q20106,q20007,q20107,q20008,q20108,"""
+  sb append """q20009,20109,q20010,q20110,q20011,q20012,"""
   sb append """q30002,q30003,q30004,q30005,q30006,q30007,q30008,q30009,q30010"""
   sb append "\n"
   map foreach { item =>
@@ -69,14 +70,23 @@ object Main extends App {
 
         row append Extractors.question(item._2, 20001) append ","
         row append Extractors.question(item._2, 20002) append ","
+        row append Extractors.question(item._2, 20102) append ","
         row append Extractors.question(item._2, 20003) append ","
+        row append Extractors.question(item._2, 20103) append ","
         row append Extractors.question(item._2, 20004) append ","
+        row append Extractors.question(item._2, 20104) append ","
         row append Extractors.question(item._2, 20005) append ","
+        row append Extractors.question(item._2, 20105) append ","
         row append Extractors.question(item._2, 20006) append ","
+        row append Extractors.question(item._2, 20106) append ","
         row append Extractors.question(item._2, 20007) append ","
+        row append Extractors.question(item._2, 20107) append ","
         row append Extractors.question(item._2, 20008) append ","
+        row append Extractors.question(item._2, 20108) append ","
         row append Extractors.question(item._2, 20009) append ","
+        row append Extractors.question(item._2, 20109) append ","
         row append Extractors.question(item._2, 20010) append ","
+        row append Extractors.question(item._2, 20110) append ","
         row append Extractors.question(item._2, 20011) append ","
         row append Extractors.question(item._2, 20012) append ","
 
