@@ -17,10 +17,23 @@ import scala.io.Source
 
 object Main extends App {
 
+
+  println(s"Args: ${args.mkString(",")}")
+  val path = Option(args(0))
+
   implicit val formats = DefaultFormats + new LocalDateTimeSerializer
 
   val url = "https://cut.social/2017/hypnosisapp1/json"
-  val json = parse(loadContent(url)).extract[List[Result]]
+  var jsonStr = ""
+
+  if (path.isDefined) {
+    println(s"Loading ${path.get}...")
+    jsonStr = loadFile(path.get)
+  } else {
+    jsonStr = loadContent(url)
+  }
+
+  val json = parse(jsonStr).extract[List[Result]]
 
   var map = mutable.Map[String, List[Result]]()
   json.foreach { item =>
@@ -31,15 +44,16 @@ object Main extends App {
 
   var sb = StringBuilder.newBuilder
 
-  sb append """name,phone,device_id,harvard,oakley,q10001,q10002,q10003,q10004,q10005,q10006,q10007,q10008,"""
+  sb append """name,phone,device_id,intro,harvard,oakley,q10001,q10002,q10003,q10004,q10005,q10006,q10007,q10008,q10009,"""
   sb append """q20001,q20002,q20003,q20004,q20005,q20006,q20007,q20008,q20009,q20010,q20011,q20012,"""
   sb append """q30002,q30003,q30004,q30005,q30006,q30007,q30008,q30009,q30010"""
   sb append "\n"
   map foreach { item =>
-    val harv = Extractors.session(item._2, 201)
-    val oakl = Extractors.session(item._2, 301)
+    val intro = Extractors.session(item._2, 101)
+    val harvd = Extractors.session(item._2, 201)
+    val oakly = Extractors.session(item._2, 301)
 
-    if (harv || oakl) {
+    if (intro || harvd || oakly) {
       val v = Extractors.profile(item._2)
       if (v.isDefined) {
         var row = StringBuilder.newBuilder
@@ -51,6 +65,7 @@ object Main extends App {
         row append Extractors.question(item._2, 10006) append ","
         row append Extractors.question(item._2, 10007) append ","
         row append Extractors.question(item._2, 10008) append ","
+        row append Extractors.question(item._2, 10009) append ","
 
         row append Extractors.question(item._2, 20001) append ","
         row append Extractors.question(item._2, 20002) append ","
@@ -75,13 +90,17 @@ object Main extends App {
         row append Extractors.question(item._2, 30009) append ","
         row append Extractors.question(item._2, 30010) append ""
 
-        sb append s"""${v.get.name.getOrElse("")}, ${v.get.emailPhone.getOrElse("")}, ${item._1}, $harv, $oakl, ${row.result}"""
+        sb append s"""${v.get.name.getOrElse("")},${v.get.emailPhone.getOrElse("")},${item._1},$intro,$harvd,$oakly,${row.result}"""
         sb append "\n"
       }
     }
   }
 
   writeToFile(sb.result)
+
+  def loadFile(path: String): String = {
+    Source.fromFile(path, "UTF-8").mkString
+  }
 
   def loadContent(url: String): String = {
     //Source.fromFile("/Users/morteza/Desktop/hypnosisapp1_201708281.json").mkString
@@ -97,7 +116,7 @@ object Main extends App {
   }
 
   def writeToFile(str: String) = {
-    Files.write(Paths.get("/Users/morteza/Desktop/hypnosisapp1_201708281.csv"), str.getBytes(StandardCharsets.UTF_8))
+    Files.write(Paths.get(s"/Users/morteza/Desktop/hypnosisapp1_${System.currentTimeMillis}.csv"), str.getBytes(StandardCharsets.UTF_8))
   }
 }
 
