@@ -6,6 +6,9 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl._
 import org.json4s.JsonAST.JValue
 import org.json4s._
 import org.json4s.native.JsonMethods._
@@ -13,7 +16,8 @@ import org.json4s.scalap.scalasig.StringBytesPair
 
 import scala.collection._
 import scala.collection.mutable.ListBuffer
-import scala.io.Source
+
+import scala.io.{Source => IOSource}
 
 object Main extends App {
 
@@ -49,6 +53,18 @@ object Main extends App {
   sb append """q20009,20109,q20010,q20110,q20011,q20012,"""
   sb append """q30002,q30003,q30004,q30005,q30006,q30007,q30008,q30009,q30010"""
   sb append "\n"
+
+  /*
+  implicit val system = ActorSystem("TestSystem")
+  implicit val materializer = ActorMaterializer()
+
+  val flow = Source(map.toList) via
+    Flow[(String, List[Result])].map(elem => Extractors.question(elem._2, 10001)) to
+    Sink.foreach(println)
+
+  flow.run()
+  */
+
   map foreach { item =>
     val intro = Extractors.session(item._2, 101)
     val harvd = Extractors.session(item._2, 201)
@@ -109,7 +125,7 @@ object Main extends App {
   writeToFile(sb.result)
 
   def loadFile(path: String): String = {
-    Source.fromFile(path, "UTF-8").mkString
+    IOSource.fromFile(path, "UTF-8").mkString
   }
 
   def loadContent(url: String): String = {
@@ -122,7 +138,7 @@ object Main extends App {
       case (name, value) => connection.setRequestProperty(name, value)
     })
 
-    Source.fromInputStream(connection.getInputStream).mkString
+    IOSource.fromInputStream(connection.getInputStream).mkString
   }
 
   def writeToFile(str: String) = {
