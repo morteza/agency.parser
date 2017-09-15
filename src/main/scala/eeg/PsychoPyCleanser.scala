@@ -3,6 +3,8 @@ package eeg
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
+import org.json4s.scalap.scalasig.StringBytesPair
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.io.{Source => IOSource}
@@ -39,6 +41,9 @@ object PsychoPyCleanser extends App {
   conditions.put("fre_exp", ListBuffer[Double]()) // Explicit Free
   conditions.put("fre_ctl", ListBuffer[Double]()) // Control Free
   conditions.put("unknown", ListBuffer[Double]()) // Control Free
+
+  var trialsInRowsCsv = StringBuilder.newBuilder
+  trialsInRowsCsv append "group, rt\n"
 
   //1. iterate over rows and extract interesting data
   //2. for each row check correctness
@@ -80,6 +85,8 @@ object PsychoPyCleanser extends App {
         case something => {println (s"Unknown condition: $something"); condition = "unknown"}
       }
       conditions(condition) += fields._5
+      // Append to row-based trial csv if subject response is correct
+      if (fields._7) trialsInRowsCsv append s"$condition, ${fields._5.toString}\n"
     })
 
   //TODO write lists as csv rows
@@ -90,6 +97,7 @@ object PsychoPyCleanser extends App {
   }
 
   writeToFile(path.get.substring(0, path.get.length-4) + "_conditions.csv", sb.mkString)
+  writeToFile(path.get.substring(0, path.get.length-4) + "_conditions_rows.csv", trialsInRowsCsv.mkString)
 
   //TODO later we need to transpose columns<->rows using Excel/Numbers
 
