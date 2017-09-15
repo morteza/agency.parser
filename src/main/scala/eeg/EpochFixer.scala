@@ -15,9 +15,19 @@ import scala.io.{Source => IOSource}
   * To fix WinEEG/PsychoPy labels, and prepare epoch files for EEGLAB
   */
 object EpochFixer extends App {
-  val path = Option(args(0))
+  val subject = Option(args(0))
+
+  if (subject.isEmpty)
+    System.exit(0)
+
+
+  val path = Option(s"/Users/morteza/Desktop/eeg/${subject.get}/${subject.get}_labels.txt")
+  val trialsPath = Option(s"/Users/morteza/Desktop/eeg/${subject.get}/${subject.get}_trials.csv")
 
   val content = loadFile(path.get)
+  val trialsContent = loadFile(trialsPath.get)
+
+  val trials = trialsContent.split("\n")
 
   //implicit val system = ActorSystem("EpochFixerSystem")
   //implicit val materializer = ActorMaterializer()
@@ -26,24 +36,27 @@ object EpochFixer extends App {
 
   var sb = StringBuilder.newBuilder
 
-  sb append "Latency  Event  Type"
+  sb append "Latency, Event, TypeTrial"
   sb append "\n"
+
+  var index = 1
 
   content.split("\n").toList.foreach ( row => {
     if (!row.contains("Latency")) {
       val s = new Scanner(row)
       val lat = s.nextDouble
       val typ = s.nextInt
+      val trial = trials(Math.floor(index / 2).toInt)
       codeMap.put(typ, codeMap.getOrElse(typ, 0)+1)
       if (codeMap.getOrElse(typ, 0)>1)
         codeMap.put(typ, 0)
       val erptyp = if (codeMap.getOrElse(typ, 0)==0) "target" else "rt"
-      sb append s"$lat  $typ  $erptyp"
-      sb append "\n"
+      sb append s"$lat, $typ, $erptyp$trial\n"
     }
+    index += 1
   })
 
-  writeToFile(path.get + ".events", sb.mkString)
+  writeToFile(s"/Users/morteza/Desktop/eeg/${subject.get}/${subject.get}_events.csv", sb.mkString)
 
   /*
   val flow = Source(content.split("\n").toList) via

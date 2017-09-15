@@ -70,7 +70,7 @@ object Main extends App {
     val harvd = Extractors.session(item._2, 201)
     val oakly = Extractors.session(item._2, 301)
 
-    if (intro || harvd || oakly) {
+    if (intro || harvd || oakly || true) {
       val v = Extractors.profile(item._2)
       if (v.isDefined) {
         var row = StringBuilder.newBuilder
