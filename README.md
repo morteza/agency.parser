@@ -3,15 +3,19 @@
 **Note:** Change mainClass in `build.sbt` or comment it to select at runtime.
 
 
-## HypnosisApp Results Parser
+## HypnosisApp Results Parser (`Main`)
 
 `sbt "run <json_file_path>"`
 
 
-## Epoch Fixer
+## Epoch Fixer (`eeg.EpochFixer`)
 
 Run `sbt "run <subject>"`.
 
-## PsychoPy Data Cleaner
+## PsychoPy Group Cleaner (`eeg.PsychoPyGroupCleaner`)
+
+Simply run `sbt run`.
+
+## PsychoPy Subject Cleaner (`eeg.PsychoPySubjectCleaner`)
 
 Run `sbt "run <subject>"`.
