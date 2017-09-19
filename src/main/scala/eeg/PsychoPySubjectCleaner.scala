@@ -95,7 +95,7 @@ class PsychoPySubjectCleaner {
       }
       conditions(condition) += fields._5
       // Append to row-based trial csv if subject response is correct
-      if (fields._7) trialsInRowsCsv append s"$subject, $group, $condition, ${fields._5.toString}\n"
+      if (fields._7) trialsInRowsCsv append s"$subject,$group,$condition,${fields._5.toString}\n"
     })
 
     //TODO write lists as csv rows

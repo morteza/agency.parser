@@ -35,7 +35,7 @@ object PsychoPyGroupCleaner extends App {
 
 
   val allSubjectsRows = StringBuilder.newBuilder
-  allSubjectsRows append "subject, group, condition, rt\n"
+  allSubjectsRows append "subject,group,condition,rt\n"
   subjects foreach { s =>
     val path = s"${homeDir}/Desktop/data/${s._1}/${s._1}.csv"
     val (conditions, conditionsInRows) = subjectClearner.analyseSubject(s._1, path, s._2, true)

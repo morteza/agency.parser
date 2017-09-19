@@ -21,8 +21,8 @@ object EpochFixer extends App {
     System.exit(0)
 
 
-  val path = Option(s"/Users/morteza/Desktop/eeg/${subject.get}/${subject.get}_labels.txt")
-  val trialsPath = Option(s"/Users/morteza/Desktop/eeg/${subject.get}/${subject.get}_trials.csv")
+  val path = Option(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_eeg_labels.txt")
+  val trialsPath = Option(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_eeg_conditions.csv")
 
   val content = loadFile(path.get)
   val trialsContent = loadFile(trialsPath.get)
@@ -36,7 +36,7 @@ object EpochFixer extends App {
 
   var sb = StringBuilder.newBuilder
 
-  sb append "Latency, Event, TypeTrial"
+  sb append "Latency Index Condition Trial"
   sb append "\n"
 
   var index = 1
@@ -44,19 +44,20 @@ object EpochFixer extends App {
   content.split("\n").toList.foreach ( row => {
     if (!row.contains("Latency")) {
       val s = new Scanner(row)
-      val lat = s.nextDouble
+      var lat = s.nextDouble
       val typ = s.nextInt
       val trial = trials(Math.floor(index / 2).toInt)
       codeMap.put(typ, codeMap.getOrElse(typ, 0)+1)
       if (codeMap.getOrElse(typ, 0)>1)
         codeMap.put(typ, 0)
-      val erptyp = if (codeMap.getOrElse(typ, 0)==0) "target" else "rt"
-      sb append s"$lat, $typ, $erptyp$trial\n"
+      val eventType = if (codeMap.getOrElse(typ, 0)==1) "start" else "rt"
+      if ("start".equalsIgnoreCase(eventType)) lat = lat + 2.4
+      sb append s"${lat} $typ $eventType $trial\n"
     }
     index += 1
   })
 
-  writeToFile(s"/Users/morteza/Desktop/eeg/${subject.get}/${subject.get}_events.csv", sb.mkString)
+  writeToFile(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_eeg_epochs.csv", sb.mkString)
 
   /*
   val flow = Source(content.split("\n").toList) via
