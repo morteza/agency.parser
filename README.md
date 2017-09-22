@@ -12,7 +12,7 @@ https://osf.io/e8e8c/ for more
 
 ## Epoch Fixer (`eeg.EpochFixer`)
 
-Run `sbt "run <subject>"`.
+Run `sbt "run <subject>"` for a single subject, or `sbt "run <subject_1> <subject_2> ..."` for multiple subjects.
 
 ## PsychoPy Group Cleaner (`eeg.PsychoPyGroupCleaner`)
 
