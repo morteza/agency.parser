@@ -19,7 +19,7 @@ import scala.collection.mutable.ListBuffer
 
 import scala.io.{Source => IOSource}
 
-object Main extends App {
+object HypnosisAppJsonParser extends App {
 
 
   println(s"Args: ${args.mkString(",")}")
