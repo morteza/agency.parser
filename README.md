@@ -1,4 +1,6 @@
-# Hypnosis App Parser
+# Agency Attribution Tools and Scripts
+
+https://osf.io/e8e8c/ for more
 
 **Note:** Change mainClass in `build.sbt` or comment it to select at runtime.
 
