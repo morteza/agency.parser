@@ -20,14 +20,13 @@ object EpochFixer extends App {
   if (subject.isEmpty)
     System.exit(0)
 
-
-  val path = Option(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_eeg_labels.txt")
-  val trialsPath = Option(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_eeg_conditions.csv")
+  val path = Option(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_labels.txt")
+  val trialsPath = Option(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_trial_orders.txt")
 
   val content = loadFile(path.get)
   val trialsContent = loadFile(trialsPath.get)
 
-  val trials = trialsContent.split("\n")
+  val trials = trialsContent.split("\n").drop(1) // drop header
 
   //implicit val system = ActorSystem("EpochFixerSystem")
   //implicit val materializer = ActorMaterializer()
@@ -36,25 +35,26 @@ object EpochFixer extends App {
 
   var sb = StringBuilder.newBuilder
 
-  sb append "Latency Index Condition Trial"
+  sb append "Latency Group Type Index"
   sb append "\n"
 
-  var index = 1
+  var i = 0
 
-  content.split("\n").toList.foreach ( row => {
-    if (!row.contains("Latency")) {
-      val s = new Scanner(row)
-      var lat = s.nextDouble
-      val typ = s.nextInt
-      val trial = trials(Math.floor(index / 2).toInt)
-      codeMap.put(typ, codeMap.getOrElse(typ, 0)+1)
-      if (codeMap.getOrElse(typ, 0)>1)
-        codeMap.put(typ, 0)
-      val eventType = if (codeMap.getOrElse(typ, 0)==1) "start" else "rt"
-      if ("start".equalsIgnoreCase(eventType)) lat = lat + 2.4
-      sb append s"${lat} $typ $eventType $trial\n"
-    }
-    index += 1
+  // drop header
+  content.split("\n").drop(1).toList.foreach ( row => {
+    val practice = i<40
+    val s = new Scanner(row)
+    var latency = s.nextDouble
+    val order = s.nextInt
+    val group = trials(Math.floor(i / 2).toInt)
+    val eventType = if (codeMap.getOrElse(order, 0)==0) "start" else "rt"
+    if (codeMap.getOrElse(order, 0) >= 1)
+      codeMap.put(order, 0)
+    else
+      codeMap.put(order, codeMap.getOrElse(order, 0)+1)
+    if ("start".equalsIgnoreCase(eventType)) latency = latency + {if (practice) 1.0 else 2.0} // move from start-of-fixation to start-of-stimulus
+    sb append s"$latency $group $eventType $order\n"
+    i += 1
   })
 
   writeToFile(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_eeg_epochs.csv", sb.mkString)
