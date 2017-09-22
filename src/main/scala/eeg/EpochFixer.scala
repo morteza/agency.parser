@@ -57,7 +57,7 @@ object EpochFixer extends App {
     i += 1
   })
 
-  writeToFile(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_eeg_epochs.csv", sb.mkString)
+  writeToFile(s"/Users/morteza/Desktop/data/${subject.get}/${subject.get}_eeg_epochs.txt", sb.mkString)
 
   /*
   val flow = Source(content.split("\n").toList) via
