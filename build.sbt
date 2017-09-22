@@ -6,6 +6,7 @@ scalaVersion := "2.12.3"
 
 //mainClass in (Compile, run)  := Some("app.HypnosisAppJsonParser")
 mainClass in (Compile, run)  := Some("eeg.EpochFixer")
+//mainClass in (Compile, run)  := Some("eeg.WinEEGReactionTimeExtractor")
 //mainClass in (Compile, run)  := Some("eeg.PsychoPySubjectCleaner")
 //mainClass in (Compile, run)  := Some("eeg.PsychoPyGroupCleaner")
 
