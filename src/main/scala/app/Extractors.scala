@@ -1,3 +1,5 @@
+package app
+
 import scala.collection.mutable
 
 object Extractors {

@@ -1,10 +1,9 @@
+package app
 
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
@@ -12,7 +11,6 @@ import akka.stream.scaladsl._
 import org.json4s.JsonAST.JValue
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import org.json4s.scalap.scalasig.StringBytesPair
 
 import scala.collection._
 import scala.collection.mutable.ListBuffer
@@ -116,7 +114,7 @@ object HypnosisAppJsonParser extends App {
         row append Extractors.question(item._2, 30009) append ","
         row append Extractors.question(item._2, 30010) append ""
 
-        sb append s"""${v.get.name.getOrElse("")},${v.get.emailPhone.getOrElse("")},${item._1},$intro,$harvd,$oakly,${row.result}"""
+        sb append s"""${v.get.name.getOrElse("")},"${v.get.emailPhone.getOrElse("")}",${item._1},$intro,$harvd,$oakly,${row.result}"""
         sb append "\n"
       }
     }
