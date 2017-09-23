@@ -49,7 +49,7 @@ class PsychoPySubjectCleaner {
     conditions.put("imp_inc", ListBuffer[Double]()) // Implicit Incorrect
     conditions.put("fre_exp", ListBuffer[Double]()) // Explicit Free
     conditions.put("fre_ctl", ListBuffer[Double]()) // Control Free
-    conditions.put("unknown", ListBuffer[Double]()) // Control Free
+    conditions.put("misc", ListBuffer[Double]()) // Wrong answers, low agency, etc
 
     var trialsInRowsCsv = StringBuilder.newBuilder
     //trialsInRowsCsv append "subject, group, condition, rt\n"
@@ -75,7 +75,7 @@ class PsychoPySubjectCleaner {
         fields(2).trim,
         fields(4).trim.toInt,
         response,
-        rt,
+        rt, // 5
         fields(11).trim.toInt,
         isCorrect(group, response))
     })
@@ -84,14 +84,14 @@ class PsychoPySubjectCleaner {
       // put into the corrsponding list of RTs
       .map(fields => {
       var condition = ""
-      (fields._1,fields._7) match {
-        case (1, true) | (5, true) => { condition = "exp_cor" }
-        case (1, false) | (5, false) => { condition = "exp_inc" }
-        case (4, _) => { condition = "fre_ctl" }
-        case (3, _) => { condition = "fre_exp" }
-        case (2, true) | (6, true) => { condition = "imp_cor" }
-        case (2, false) | (6, false) => { condition = "imp_inc" }
-        case something => {println (s"Unknown condition: $something"); condition = "unknown"}
+      (fields._1,fields._7, fields._2) match {
+        case (1, true, "high") | (5, true, "high") => { condition = "exp_cor" }
+        case (1, false, "high") | (5, false, "high") => { condition = "exp_inc" }
+        case (4, _, "high") => { condition = "fre_ctl" }
+        case (3, _, "high") => { condition = "fre_exp" }
+        case (2, true, "high") | (6, true, "high") => { condition = "imp_cor" }
+        case (2, false, "high") | (6, false, "high") => { condition = "imp_inc" }
+        case something => {println (s"Unknown condition: $subject$something"); condition = "misc"}
       }
       conditions(condition) += fields._5
       // Append to row-based trial csv if subject response is correct
