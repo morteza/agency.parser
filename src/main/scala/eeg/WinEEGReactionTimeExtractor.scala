@@ -7,7 +7,6 @@ import java.util.Scanner
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
-import eeg.EpochFixer.subject
 
 import scala.collection.mutable
 import scala.io.{Source => IOSource}

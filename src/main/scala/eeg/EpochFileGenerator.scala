@@ -7,7 +7,6 @@ import java.util.Scanner
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
-import eeg.EpochFixer.subject
 
 import scala.collection.mutable
 import scala.io.{Source => IOSource}
@@ -15,8 +14,7 @@ import scala.io.{Source => IOSource}
 /**
   * To fix WinEEG/PsychoPy labels, and prepare epoch files for EEGLAB
   */
-object EpochFixer extends App {
-  val subject = Option(args(0))
+object EpochFileGenerator extends App {
 
   args.foreach{subject => createSubjectEpochs(subject, System.getProperty("user.home")+"/Desktop/data")}
 
@@ -32,6 +30,7 @@ object EpochFixer extends App {
     if (subject == null || subject.trim.length!=3)
       return
 
+    println(s"Generating epoch file for $subject")
     val removePractice = true
 
     val path = Option(s"${rootDir}/${subject}/${subject}_labels.txt")
