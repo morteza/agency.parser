@@ -17,9 +17,12 @@ dataDir = '/Users/morteza/Desktop/data/';
 outputDir = strcat(dataDir,'eeglab/preproc');
 eeglabRoot = '/Users/morteza/Documents/MATLAB/eeglab14_1_1b/';
 
+epoch = [-.5 1.5]; % in seconds
+epochBaseline = [-150 0]; % in millis
+
 %subjects = 'ach aka akh bah fhe mhe mkh nkh nsh rho rsa sa1 sa2 sfa sja';
 %for subjectIndex = 1:15
-subjects = 'ach';
+subjects = 'sja';
 for subjectIndex = 1:1
     subject = subjects(subjectIndex*4-3:subjectIndex*4-1);
     subjectRawData = strcat(dataDir, subject, '/', subject, '_raw.edf');
@@ -43,32 +46,38 @@ for subjectIndex = 1:1
 
     % Import channel location (BEM 10-20)
     EEG = pop_chanedit(EEG, 'lookup',strcat(eeglabRoot, '/plugins/dipfit2.3/standard_BEM/elec/standard_1020.elc'),'eval','chans = pop_chancenter( chans, [],[]);');
-    
-    % TODO Import ERP event data into the dataset (<subject>_epochs.txt).
-    
+        
     % Remove line noises (cleanline) - 
     EEG = pop_cleanline(EEG, 'bandwidth', 2,'chanlist', [1:19], 'computepower', 0, 'linefreqs', [50 100 150 200 250],...
         'normSpectrum', 0, 'p', 0.01, 'pad', 2, 'plotfigures', 0, 'scanforlines', 1, 'sigtype', 'Channels', 'tau', 100,...
         'verb', 1, 'winsize', 4, 'winstep', 4);
     
-    % Reject bad channels and correct continuous data using ASR.
-    backupEEG = EEG; % keep the old one for interpolation
-    % TODO EEG = clean_rawdata(EEG, 5, -1, 0.85, 4, 20, 0.25);
-    
-    % Remove nosiy channels (eye-proofed!), and then Interpolate all the removed channels (C4 for now)
-    EEG = pop_select(EEG,'nochannel',{'C4'});
-    EEG = pop_interp(EEG, backupEEG.chanlocs, 'spherical');
-    
-    % Re-reference the data to AA channel (no 20)
+    % Re-reference the data to AA channel (Channel 20)
     EEG = pop_reref(EEG, 20);
     EEG = eeg_checkset(EEG);
-    
+
+    % Reject noisy channels and correct continuous data using ASR.
+    % TODO backupEEG = EEG; % keep the old one for interpolation
+    % TODO EEG = clean_rawdata(EEG, 5, -1, 0.85, 4, 20, 0.25);
+
+    % Remove nosiy channels (eye-proofed!), and then Interpolate all the removed channels (C4 or No. 11 for now)
+    %EEG = pop_select(EEG,'nochannel',{'C4'});
+    EEG = pop_interp(EEG, 11, 'spherical'); % Interpolate C4 (Channel 11)
+
     % ICA (rank is manually set to 18)
     EEG = pop_runica(EEG, 'icatype', 'runica', 'extended', 1, 'pca', 18);
     EEG = eeg_checkset(EEG, 'ica');
-    
-    % TODO Remove components (review components and set channel numbers.
-    % EEG = pop_subcomp( EEG, [4  7], 0);
+
+    % Remove components (review components and set channel numbers).
+    % WARNING: Remove ICA components manually :-)
+    %EEG = pop_subcomp( EEG, [1 2 3], 0);
+
+    % Import ERP event data into the dataset (<subject>_epochs.txt).
+    EEG = pop_importevent( EEG, 'event',[dataDir subject '/' subject '_eeg_epochs.txt'],'fields',{'latency' 'group' 'type' 'index'},'skipline',1,'timeunit',1,'optimalign','off');
+    EEG = pop_epoch( EEG, {'start'}, epoch, 'newname', [subject '_epochs'], 'epochinfo', 'yes');
+    EEG = eeg_checkset(EEG);
+    EEG = pop_rmbase(EEG, epochBaseline);
+    EEG = eeg_checkset(EEG);
 
     % Save the dataset
     EEG = pop_saveset(EEG, 'filename', strcat(subject, '_preproc'), 'filepath', outputDir);
