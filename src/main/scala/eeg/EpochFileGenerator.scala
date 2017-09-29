@@ -34,7 +34,7 @@ object EpochFileGenerator extends App {
     val removePractice = true
 
     val path = Option(s"${rootDir}/${subject}/${subject}_labels.txt")
-    val trialsPath = Option(s"${rootDir}/${subject}/${subject}_trial_orders.txt")
+    val trialsPath = Option(s"${rootDir}/${subject}/${subject}_trial_orders.csv")
 
     val content = loadFile(path.get)
     val trialsContent = loadFile(trialsPath.get)
