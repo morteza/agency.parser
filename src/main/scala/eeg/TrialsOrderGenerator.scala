@@ -51,7 +51,7 @@ object TrialsOrderGenerator extends App {
     val block2 = sortByOrder(trials.slice(offset + 78 , offset + 156))
     val block3 = sortByOrder(trials.slice(offset + 156, 236))
 
-    if (!removePractice) for (i <- 1 to 20) result append "7\n" // Practice group is 8
+    if (!removePractice) for (i <- 1 to 20) result append "7\n" // Practice group is 7
     extractGroups(block1).map(grp => result append s"$grp\n")
     extractGroups(block2).map(grp => result append s"$grp\n")
     extractGroups(block3).map(grp => result append s"$grp\n")

@@ -68,7 +68,7 @@ object EpochFileGenerator extends App {
       i += 1
     })
 
-    writeToFile(s"${rootDir}/${subject}/${subject}_eeg_epochs.txt", sb.mkString)
+    writeToFile(s"${rootDir}/misc/epochs/${subject}_eeg_epochs.txt", sb.mkString)
 
   }
 

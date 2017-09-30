@@ -17,16 +17,17 @@ dataDir = '/Users/morteza/Desktop/data/';
 outputDir = strcat(dataDir,'eeglab/preproc');
 eeglabRoot = '/Users/morteza/Documents/MATLAB/eeglab14_1_1b/';
 
-epoch = [-.5 1.5]; % in seconds
-epochBaseline = [-150 0]; % in millis
+epoch = [-1 2]; % in seconds
+epochBaseline = [-200 -100]; % in millis and we have some delays (100ms)!
 
 %subjects = 'ach aka akh bah fhe mhe mkh nkh nsh rho rsa sa1 sa2 sfa sja';
 %for subjectIndex = 1:15
-subjects = 'sja';
-for subjectIndex = 1:1
+subjects = 'fhe'; % testing single subject
+for subjectIndex = 1:1 % testing single subject
     subject = subjects(subjectIndex*4-3:subjectIndex*4-1);
     subjectRawData = strcat(dataDir, subject, '/', subject, '_raw.edf');
     subjectProcData = strcat(dataDir, subject, '/', subject, '_proc.edf');
+    subjectEpochFile = [dataDir '/misc/epochs/' subject '_eeg_epochs.txt'];
     subjDir = strcat(dataDir, subject);
 
     % Import data (using FILEIO EDF+ reader)
@@ -45,7 +46,7 @@ for subjectIndex = 1:1
     EEG = eeg_checkset( EEG );
 
     % Import channel location (BEM 10-20)
-    EEG = pop_chanedit(EEG, 'lookup',strcat(eeglabRoot, '/plugins/dipfit2.3/standard_BEM/elec/standard_1020.elc'),'eval','chans = pop_chancenter( chans, [],[]);');
+    EEG = pop_chanedit(EEG, 'lookup',[eeglabRoot, '/plugins/dipfit2.3/standard_BEM/elec/standard_1020.elc'],'eval','chans = pop_chancenter( chans, [],[]);');
         
     % Remove line noises (cleanline) - 
     EEG = pop_cleanline(EEG, 'bandwidth', 2,'chanlist', [1:19], 'computepower', 0, 'linefreqs', [50 100 150 200 250],...
@@ -73,7 +74,7 @@ for subjectIndex = 1:1
     %EEG = pop_subcomp( EEG, [1 2 3], 0);
 
     % Import ERP event data into the dataset (<subject>_epochs.txt).
-    EEG = pop_importevent( EEG, 'event',[dataDir subject '/' subject '_eeg_epochs.txt'],'fields',{'latency' 'group' 'type' 'index'},'skipline',1,'timeunit',1,'optimalign','off');
+    EEG = pop_importevent( EEG, 'event', subjectEpochFile, 'fields',{'latency' 'grp' 'type' 'index'},'skipline',1,'timeunit',1,'optimalign','off');
     EEG = pop_epoch( EEG, {'start'}, epoch, 'newname', [subject '_epochs'], 'epochinfo', 'yes');
     EEG = eeg_checkset(EEG);
     EEG = pop_rmbase(EEG, epochBaseline);
