@@ -104,6 +104,9 @@ object TrialsOrderGenerator extends App {
     * 4: Explicit Right
     * 5: Free
     * 6: Control
+    * 10: Practice Onset
+    * 11: Practice RT
+    * 12: Timeout
     * @param originalGroup
     * @param response in (eventCode,responseCode) format.
     * @return

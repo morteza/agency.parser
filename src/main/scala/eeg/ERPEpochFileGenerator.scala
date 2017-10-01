@@ -43,6 +43,8 @@ object ERPEpochFileGenerator extends App {
     sb append "Latency Group Type Index\n"
 
     var i = 0
+    var rt = 0.0
+    var timeouts = 0
 
     // drop header and practice rounds
     content.split("\n").drop(if (removePractice) 41 else 1).toList.foreach ( row => {
@@ -50,16 +52,25 @@ object ERPEpochFileGenerator extends App {
       var latency = s.nextDouble
       val order = s.nextInt
       //val group = trials(Math.floor(i / 2).toInt)
-      val group = trials(i)
+      var group = trials(i)
       val eventType = if (codeMap.getOrElse(order, 0)==0) "start" else "rt"
       if (codeMap.getOrElse(order, 0) >= 1)
         codeMap.put(order, 0)
       else
         codeMap.put(order, codeMap.getOrElse(order, 0)+1)
-      if ("start".equalsIgnoreCase(eventType)) latency = latency + {if ((i<40) && !removePractice) 1.0 else 1.0} // move from start-of-fixation to start-of-stimulus
-      sb append s"$latency $group $eventType $order\n"
+      if ("start".equalsIgnoreCase(eventType)) {
+        latency = latency + 1.2
+        rt = latency
+      } //{if ((i<40) && !removePractice) 1.2 else 1.2} // move from start-of-fixation to start-of-stimulus
+      if ("rt".equalsIgnoreCase(eventType)) {
+        rt = latency - rt
+        Seq(rt).filter(rt => rt>3.5 || rt<1.5).map{_ => group="12"; timeouts+=1} // timeout groups if rt>=3.5
+      }
+      sb append f"$latency%1.3f $group $eventType $order%1d\n"
       i += 1
     })
+
+    println(s"$timeouts trials marked as timeout (code 12).")
 
     writeToFile(s"${rootDir}/misc/erp_epochs/${subject}_erp_epochs.txt", sb.mkString)
 
