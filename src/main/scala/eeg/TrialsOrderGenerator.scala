@@ -15,6 +15,7 @@ object TrialsOrderGenerator extends App {
   val homeDir = System.getProperty("user.home")
 
   val removePractice = false
+  val erp = true // Uses coding for ERP (shows both stimulus and response)
 
   val subjectClearner = new PsychoPySubjectCleaner()
   val subjects = Map (
@@ -40,7 +41,8 @@ object TrialsOrderGenerator extends App {
   subjects foreach { s =>
     val path = s"$homeDir/Desktop/data/${s._1}/${s._1}.csv"
     var result = StringBuilder.newBuilder
-    result append "Group\n"
+
+    result.append(if (erp) "Event\n" else "Group\n")
 
     //val practice = loadFile(path).split("\n").drop(1).take(20)
     val trials = loadFile(path).split("\n").toList
@@ -51,11 +53,20 @@ object TrialsOrderGenerator extends App {
     val block2 = sortByOrder(trials.slice(offset + 78 , offset + 156))
     val block3 = sortByOrder(trials.slice(offset + 156, 236))
 
-    if (!removePractice) for (i <- 1 to 20) result append "7\n" // Practice group is 7
-    extractGroups(block1).map(grp => result append s"$grp\n")
-    extractGroups(block2).map(grp => result append s"$grp\n")
-    extractGroups(block3).map(grp => result append s"$grp\n")
-    writeToFile(s"$homeDir/Desktop/data/${s._1}/${s._1}_trial_orders.csv", result.mkString)
+    if (erp && !removePractice)
+      for (i <- 1 to 20) result append "10\n11\n" //ERP coding of practice (10 followed by an 11).
+
+    if ((!erp) && !removePractice)
+      for (i <- 1 to 20) result append "practice\n" // EEG coding of practice
+
+    extractEvents(block1, erp).map(grp => result append s"$grp\n")
+    extractEvents(block2, erp).map(grp => result append s"$grp\n")
+    extractEvents(block3, erp).map(grp => result append s"$grp\n")
+
+    if (erp)
+      writeToFile(s"$homeDir/Desktop/data/${s._1}/${s._1}_erp_trial_orders.csv", result.mkString)
+    else
+      writeToFile(s"$homeDir/Desktop/data/${s._1}/${s._1}_trial_orders.csv", result.mkString)
   }
 
   def writeToFile(path: String, str: String) = {
@@ -70,37 +81,72 @@ object TrialsOrderGenerator extends App {
     block.sortBy(row => row.split(",")(orderColumnIndex).trim.toInt)
   }
 
-  def extractGroups(block: List[String]): List[Int] = {
+  def extractEvents(block: List[String], erp: Boolean): List[String] = {
     block
       .map(_.split(","))
       .map(fields => {
         var response = fields(7)
         response = if (response.length>2) response.trim.toLowerCase.substring(1, fields(7).trim.length - 1) else ""
-
-        mapGroup(fields(0).trim.toInt, response)
+        if (erp)
+          mapERPGroup(fields(0).trim.toInt, response).replace(",","\n") // This to convert rows to two columns
+        else
+          mapGroup(fields(0).trim.toInt, response)
       })
   }
 
   /**
+    * Events according to our ERPLAB Study design:
+    * 9: Incorrect
+    * 8: Correct
+    * 1: Implicit Left
+    * 2: Implicit Right
+    * 3: Explicit Left
+    * 4: Explicit Right
+    * 5: Free
+    * 6: Control
+    * @param originalGroup
+    * @param response in (eventCode,responseCode) format.
+    * @return
+    */
+  def mapERPGroup(originalGroup: Int, response: String) = (originalGroup, response) match {
+    case (1, "") => "4,9"              // [Explicit, Right]: Wrong
+    case (2, "") => "2,9"              // [Implicit, Right]: Wrong
+    case (3, "") => "5,9 "             // [Free    , R/L  ]: Wrong
+    case (5, "") => "3,9"              // [Explicit, Left ]: Wrong
+    case (6, "") => "1,9"              // [Implicit, Left ]: Wrong
+
+    case (1, "left") => "4,9"          // [Explicit, Right]: Wrong
+    case (2, "left") => "2,9"          // [Implicit, Right]: Wrong
+    case (5, "right") => "3,9"         // [Explicit, Left ]: Wrong
+    case (6, "right") => "1,9"         // [Implicit, Left ]: Wrong
+
+    case (1, "right") => "4,8"         // [Explicit, Right]: Correct
+    case (2, "right")=> "2,8"          // [Implicit, Right]: Correct
+    case (3, "left") => "5,8"          // [Free    , R/L  ]: Correct
+    case (3, "right") => "5,8"         // [Free    , R/L  ]: Correct
+    case (5, "left") => "3,8"          // [Explicit, Left ]: Correct
+    case (6, "left") => "1,8"          // [Implicit, Left ]: Correct
+    case (4, _) => "6,8"               // [Control , ...  ]: Correct
+
+    case _ => "0,9"                    // [    Unknown    ]: Wrong
+  }
+
+  /**
     * Group according to our EEGLAB Study design.
-    * 7 is prct: practice
-    * 0 is wrng: wrong answer
-    * 1 is expl: explicit
-    * 2 is impl: implicit
-    * 3 is exfr: forced choice (explicit free)
-    * 4 is ctrl: control
     * @param originalGroup
     * @param response
     * @return
     */
   def mapGroup(originalGroup: Int, response: String) = (originalGroup, response) match {
-    case (5, "right") => 0  // wrong explicit
-    case (1, "left") => 0   // wrong explicit
-    case (6, "right") => 0  // wrong implicit
-    case (2, "left") => 0   // wron implicit
-    case (1, "") | (2, "") | (3, "") | (5, "") | (6, "") => 0
-    case (5, "left") => 1
-    case (6, "left") => 2
-    case _ => originalGroup
+    case (1, "") | (2, "") | (3, "") | (5, "") | (6, "") => "incorrect"
+    case (5, "right") => "incorrect"  // wrong explicit
+    case (1, "left") => "incorrect"   // wrong explicit
+    case (6, "right") => "incorrect"  // wrong implicit
+    case (2, "left") => "incorrect"   // wron implicit
+    case (5, "left") | (1, "right") => "explicit"
+    case (6, "left") | (2, "right")=> "implicit"
+    case (4, _) => "control"
+    case (3, _) => "free"
+    case _ => "invalid"
   }
 }
