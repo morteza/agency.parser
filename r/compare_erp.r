@@ -31,6 +31,7 @@ for (i in 1:length(exp$Cz)) {
   item = data.frame(typ = "fre", cz = fre$Cz[i])
   a = rbind(a, item)
 }
+write()
 
 res = aov(data = a, cz ~ typ)
 summary(res)

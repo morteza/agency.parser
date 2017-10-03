@@ -59,7 +59,7 @@ object ERPEpochFileGenerator extends App {
       else
         codeMap.put(order, codeMap.getOrElse(order, 0)+1)
       if ("start".equalsIgnoreCase(eventType)) {
-        latency = latency + 1.2
+        latency = latency + 1.2 + 0.1 // add fixation, jitter, and averaged USB delay
         rt = latency
       } //{if ((i<40) && !removePractice) 1.2 else 1.2} // move from start-of-fixation to start-of-stimulus
       if ("rt".equalsIgnoreCase(eventType)) {
