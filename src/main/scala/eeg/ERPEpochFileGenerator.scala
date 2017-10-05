@@ -16,7 +16,25 @@ import scala.io.{Source => IOSource}
   */
 object ERPEpochFileGenerator extends App {
 
-  args.foreach{subject => createSubjectEpochs(subject, System.getProperty("user.home")+"/Desktop/data")}
+  val subjects = Map (
+    "ach" -> "nonhyp",
+    "aka" -> "hyp",
+    "akh" -> "hyp",
+    "bah" -> "nonhyp",
+    "fhe" -> "hyp",
+    "mhe" -> "nonhyp",
+    "mkh" -> "hyp",
+    "nkh" -> "hyp",
+    "nsh" -> "hyp",
+    "rho" -> "hyp",
+    "rsa" -> "hyp",
+    "sa1" -> "hyp",
+    "sa2" -> "hyp",
+    "sfa" -> "hyp",
+    "sja" -> "hyp",
+  )
+
+  subjects.foreach{s => createSubjectEpochs(s._1, System.getProperty("user.home")+"/Desktop/data")}
 
   def createSubjectEpochs(subject: String, rootDir: String): Unit = {
     if (subject == null || subject.trim.length!=3)
@@ -43,7 +61,7 @@ object ERPEpochFileGenerator extends App {
     sb append "Latency Group Type Index\n"
 
     var i = 0
-    var rt = 0.0
+    var startTimestamp = 0.0
     var timeouts = 0
 
     // drop header and practice rounds
@@ -54,17 +72,23 @@ object ERPEpochFileGenerator extends App {
       //val group = trials(Math.floor(i / 2).toInt)
       var group = trials(i)
       val eventType = if (codeMap.getOrElse(order, 0)==0) "start" else "rt"
+
       if (codeMap.getOrElse(order, 0) >= 1)
         codeMap.put(order, 0)
       else
         codeMap.put(order, codeMap.getOrElse(order, 0)+1)
+
       if ("start".equalsIgnoreCase(eventType)) {
-        latency = latency + 1.2 + 0.1 // add fixation, jitter, and averaged USB delay
-        rt = latency
+        latency = latency + 1.2 // add fixation, jitter, and averaged USB delay
+        startTimestamp = latency
       } //{if ((i<40) && !removePractice) 1.2 else 1.2} // move from start-of-fixation to start-of-stimulus
       if ("rt".equalsIgnoreCase(eventType)) {
-        rt = latency - rt
-        Seq(rt).filter(rt => rt>3.5 || rt<1.5).map{_ => group="12"; timeouts+=1} // timeout groups if rt>=3.5
+        //println(group)
+        var rt = group.split(":")(1).toDouble
+        latency = rt + startTimestamp + {if (rt<3.9) 0.2 else 0.0} // to compensate jitter and delayed keyboard sensitivity
+        group = group.split(":")(0)
+        if (group==9 || group==12) timeouts+=1
+        Seq(rt).filter(rt => rt>3.5 || rt<0.1).map{_ => group="12"; timeouts+=1} // timeout groups if rt>=3.5
       }
       sb append f"$latency%1.3f $group $eventType $order%1d\n"
       i += 1
@@ -73,6 +97,7 @@ object ERPEpochFileGenerator extends App {
     println(s"$timeouts trials marked as timeout (code 12).")
 
     writeToFile(s"${rootDir}/misc/erp_epochs/${subject}_erp_epochs.txt", sb.mkString)
+    writeToFile(s"${rootDir}/${subject}/${subject}_erp_epochs.txt", sb.mkString)
 
   }
 
