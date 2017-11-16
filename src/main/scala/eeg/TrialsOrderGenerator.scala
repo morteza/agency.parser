@@ -114,26 +114,26 @@ object TrialsOrderGenerator extends App {
     */
   def mapERPGroup(originalGroup: Int, response: String, rt: Double) = {
     val res = (originalGroup, response) match {
-      case (1, "") => "4,9"             // [Explicit, Right]: Wrong
-      case (2, "") => "2,9"              // [Implicit, Right]: Wrong
-      case (3, "") => "5,9 "             // [Free    , R/L  ]: Wrong
-      case (5, "") => "3,9"              // [Explicit, Left ]: Wrong
-      case (6, "") => "1,9"              // [Implicit, Left ]: Wrong
+      case (1, "") => "24,9"             // [Explicit, Right]: Wrong
+      case (2, "") => "22,9"              // [Implicit, Right]: Wrong
+      case (3, "") => "25,9 "             // [Free    , R/L  ]: Wrong
+      case (5, "") => "23,9"              // [Explicit, Left ]: Wrong
+      case (6, "") => "21,9"              // [Implicit, Left ]: Wrong
 
-      case (1, "left") => "4,9"          // [Explicit, Right]: Wrong
-      case (2, "left") => "2,9"          // [Implicit, Right]: Wrong
-      case (5, "right") => "3,9"         // [Explicit, Left ]: Wrong
-      case (6, "right") => "1,9"         // [Implicit, Left ]: Wrong
+      case (1, "left") => "24,9"          // [Explicit, Right]: Wrong
+      case (2, "left") => "22,9"          // [Implicit, Right]: Wrong
+      case (5, "right") => "23,9"         // [Explicit, Left ]: Wrong
+      case (6, "right") => "21,9"         // [Implicit, Left ]: Wrong
 
-      case (1, "right") => "4,8"         // [Explicit, Right]: Correct
-      case (2, "right")=> "2,8"          // [Implicit, Right]: Correct
-      case (3, "left") => "5,8"          // [Free    , R/L  ]: Correct
-      case (3, "right") => "5,8"         // [Free    , R/L  ]: Correct
-      case (5, "left") => "3,8"          // [Explicit, Left ]: Correct
-      case (6, "left") => "1,8"          // [Implicit, Left ]: Correct
-      case (4, _) => "6,8"               // [Control , ...  ]: Correct
+      case (1, "right") => "24,4"         // [Explicit, Right]: Correct
+      case (2, "right")=> "22,2"          // [Implicit, Right]: Correct
+      case (3, "left") => "25,5"          // [Free    , R/L  ]: Correct
+      case (3, "right") => "25,5"         // [Free    , R/L  ]: Correct
+      case (5, "left") => "23,3"          // [Explicit, Left ]: Correct
+      case (6, "left") => "21,1"          // [Implicit, Left ]: Correct
+      case (4, _) => "26,6"               // [Control , ...  ]: Correct
 
-      case _ => "0,9"                    // [    Unknown    ]: Wrong
+      case _ => "20,9"                    // [    Unknown    ]: Wrong
     }
     res + f":$rt%1.3f"
   }

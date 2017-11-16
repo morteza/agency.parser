@@ -60,6 +60,9 @@ for sIndex = 1:numOfSubjects
   ERP = pop_binoperator( ERP, {  'bin5 = bin1 - bin4',  'bin6 = bin2 - bin4', 'bin7 = bin3 - bin4'});
   ERP = pop_savemyerp(ERP, 'erpname', [subject '_' study '_erp'], 'filename', [subject '_erp_' study '.erp'], 'filepath', erpStorageDir, 'Warning', 'on');
 
+  EEG = pop_saveset( EEG, 'savemode', 'resave');
+  EEG = eeg_checkset( EEG );
+
   % Plot ERP for Fz, Cz, and Pz
   ERP = pop_ploterps( ERP,  1:4,  5:5:15 , 'AutoYlim', 'on', 'Axsize', [0.05 0.08], 'BinNum', 'on', 'Blc', erpBaselineStr, 'Box', [4 1], 'ChLabel', 'on', 'FontSizeChan',  10, 'FontSizeLeg',  12, 'FontSizeTicks',  10, 'LegPos', 'bottom', 'Linespec', {'r-' , 'k-' , 'b-' , 'r:', 'k:' }, 'LineWidth', 1, 'Maximize', 'on', 'Style', 'Classic', 'Tag', ['FzCzPz_' subject '_' study], 'Transparency',  0, 'xscale', [ -200.0 800.0   -200:50:800 ], 'yscale', [ -5.0 5.0   -5:1:5 ], 'YDir', 'normal' );
   ERP = pop_exporterplabfigure( ERP , 'Filepath', figuresOutputDir, 'Format', 'pdf', 'Resolution',  300, 'SaveMode', 'auto', 'Tag', {'ERP_figure' ['FzCzPz_' subject '_' study] } );
