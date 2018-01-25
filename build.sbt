@@ -2,7 +2,7 @@ name := "agency.parser"
 
 version := "0.1"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.4"
 
 //mainClass in (Compile, run)  := Some("app.HypnosisAppJsonParser")
 //mainClass in (Compile, run)  := Some("eeg.EpochFileGenerator")

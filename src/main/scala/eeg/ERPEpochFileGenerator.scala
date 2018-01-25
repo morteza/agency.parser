@@ -63,6 +63,7 @@ object ERPEpochFileGenerator extends App {
     var i = 0
     var startTimestamp = 0.0
     var timeouts = 0
+    var startGroup = ""
 
     // drop header and practice rounds
     content.split("\n").drop(if (removePractice) 41 else 1).toList.foreach ( row => {
@@ -81,16 +82,28 @@ object ERPEpochFileGenerator extends App {
       if ("start".equalsIgnoreCase(eventType)) {
         latency = latency + 1.2 // add fixation, jitter, and averaged USB delay
         startTimestamp = latency
+        startGroup = group.split(":")(0)
       } //{if ((i<40) && !removePractice) 1.2 else 1.2} // move from start-of-fixation to start-of-stimulus
       if ("rt".equalsIgnoreCase(eventType)) {
         //println(group)
         var rt = group.split(":")(1).toDouble
         latency = rt + startTimestamp + {if (rt<3.9) 0.2 else 0.0} // to compensate jitter and delayed keyboard sensitivity
         group = group.split(":")(0)
-        if (group==9 || group==12) timeouts+=1
         Seq(rt).filter(rt => rt>3.5 || rt<0.1).map{_ => group="12"; timeouts+=1} // timeout groups if rt>=3.5
       }
-      sb append f"$latency%1.3f $group $eventType $order%1d\n"
+      // only add <start> events
+      if ("rt".equalsIgnoreCase(eventType) && group.toInt!=9 && group.toInt!=12) {
+        val groupStr = startGroup match {
+          case "21" => "impl"
+          case "22" => "impl"
+          case "23" => "expl"
+          case "24" => "expl"
+          case "25" => "free"
+          case "26" => "ctrl"
+          case _ => "-"
+        }
+        sb append f"$startTimestamp%1.3f $groupStr start $order%1d\n"
+      }
       i += 1
     })
 
@@ -98,6 +111,7 @@ object ERPEpochFileGenerator extends App {
 
     writeToFile(s"${rootDir}/misc/erp_epochs/${subject}_erp_epochs.txt", sb.mkString)
     writeToFile(s"${rootDir}/${subject}/${subject}_erp_epochs.txt", sb.mkString)
+    writeToFile(s"/Users/morteza/Desktop/sift_data/events/${subject}_epochs_correct_trials.txt", sb.mkString)
 
   }
 

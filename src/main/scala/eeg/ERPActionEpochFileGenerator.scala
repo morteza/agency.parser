@@ -81,7 +81,7 @@ object ERPActionEpochFileGenerator extends App {
       if ("rt".equalsIgnoreCase(eventType)) {
         //println(group)
         var rt = group.split(":")(1).toDouble
-        latency = rt + startTimestamp + {if (rt<3.9) 0.2 else 0.0} // to compensate jitter and delayed keyboard sensitivity
+        latency = rt + startTimestamp + {if (rt<3.9) 0.2 else 0.0} // to compensate for jitter and delayed keyboard sensitivity
         group = group.split(":")(0)
         if (group==9 || group==12) timeouts+=1
         Seq(rt).filter(rt => rt>3.5 || rt<0.1).map{_ => group="12"; timeouts+=1} // timeout groups if rt>=3.5
