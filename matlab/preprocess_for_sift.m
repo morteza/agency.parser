@@ -4,7 +4,7 @@
 
 % -------- Parameters ----------------------------
 erp_range = [-0.2 1];
-erp_baseline = [-100 0];
+erp_baseline = [-200 0];
 filter_high = 45;
 filter_low = 0.5;
 rootDataDir = '/Users/morteza/Desktop/sift_data';
@@ -48,6 +48,7 @@ for sIndex = 1:numOfSubjects
 
   % Interpolate noisy electrodes (C4 is channel 11 and was noisy due to the problematic electrode)
   EEG = pop_interp(EEG, 11, 'spherical');
+  % ERPLAB: EEG = pop_erplabInterpolateElectrodes( EEG , 'displayEEG',  1, 'ignoreChannels', '[]', 'interpolationMethod', 'spherical', 'replaceChannels',...
   EEG = eeg_checkset(EEG);
 
   % Remove line noise using CleanLine on all channels
@@ -60,15 +61,20 @@ for sIndex = 1:numOfSubjects
   % EEG = pop_eegfiltnew(EEG, [], filter_high, [], 0, [], 0);
   EEG = eeg_checkset(EEG);
 
+  % Polynominal detrend
+  %EEG = pop_polydetrend(EEG , 'Channels',  1:19, 'Method', 'spline', 'Windowsize',  5000, 'Windowstep', 2500);
+
   % ICA (binica)
   %dataRank = rank(double(EEG.data'));
-  [EEG.icaweights, EEG.icasphere] = binica(EEG.data, 'extended', 1);
-  EEG.incaact = EEG.icaweights*EEG.icasphere*EEG.data;
+  EEG = binica(EEG.data, 'icatype', 'binica', 'extended', 1);
   EEG = eeg_checkset(EEG, 'ica');
 
-  % Extract epochs and rebase with the following parameters
-  %   (baseline -100 to 0, and epochs -1000 to 2000 in millis)
-  %TODO: manually run these commands after removing the blink ICA comp
+  % Save the main dataset
+  EEG = pop_editset(EEG, 'setname',  [subject '_preproc_ica_epochs']);
+  EEG = pop_saveset(EEG, 'filename', [subject '_preproc_ica_epochs.set'], 'filepath', preProcDir);
+ 
+  % Explicit Extract epochs and rebase with the following parameters
+  % (pre-baseline, and epochs -200ms to 1000ms)
   EEG_expl = pop_epoch(EEG, {'expl'}, erp_range, 'epochinfo', 'yes');
   EEG_expl = eeg_checkset(EEG_expl);
   EEG_expl = pop_rmbase(EEG_expl, erp_baseline);
@@ -91,11 +97,7 @@ for sIndex = 1:numOfSubjects
   EEG_free = eeg_checkset(EEG_free);
   EEG_free = pop_editset(EEG_free, 'setname',  [subject '_preproc_ica_free']);
   EEG_free = pop_saveset(EEG_free, 'filename', [subject '_preproc_ica_free.set'], 'filepath', preProcDir);
-
-  % Save the main dataset
-  EEG = pop_editset(EEG, 'setname',  [subject '_preproc_ica_epochs']);
-  EEG = pop_saveset(EEG, 'filename', [subject '_preproc_ica_epochs.set'], 'filepath', preProcDir);
-  
+ 
   eeglab redraw;
   
   % Reject ICA components using ADJUST extension
