@@ -3,7 +3,7 @@
 % ------------------------------------------------
 
 % -------- Parameters ----------------------------
-erp_range = [-0.2 1];
+erp_range = [-0.2 0.8];
 erp_baseline = [-200 0];
 filter_high = 45;
 filter_low = 0.5;
@@ -24,7 +24,7 @@ for sIndex = 1:numOfSubjects
 
   disp(['Processing ' subject '...']);
 
-  % To put ICA junks somewhere, change directory to the subject directory
+  % To put ICA junks somewhere
   cd([rootDataDir '/ica']);
 
   % Open RAW data using FILEIO
@@ -58,7 +58,7 @@ for sIndex = 1:numOfSubjects
     
   % Filters
   EEG = pop_eegfiltnew(EEG, [], filter_low, [], 1, [], 0);
-  % EEG = pop_eegfiltnew(EEG, [], filter_high, [], 0, [], 0);
+  EEG = pop_eegfiltnew(EEG, [], filter_high, [], 0, [], 0);
   EEG = eeg_checkset(EEG);
 
   % Polynominal detrend
@@ -66,15 +66,15 @@ for sIndex = 1:numOfSubjects
 
   % ICA (binica)
   %dataRank = rank(double(EEG.data'));
-  EEG = binica(EEG.data, 'icatype', 'binica', 'extended', 1);
-  EEG = eeg_checkset(EEG, 'ica');
+  EEG = pop_runica(EEG, 'icatype', 'binica', 'extended', 1);
+  %EEG = eeg_checkset(EEG, 'ica');
 
   % Save the main dataset
   EEG = pop_editset(EEG, 'setname',  [subject '_preproc_ica_epochs']);
   EEG = pop_saveset(EEG, 'filename', [subject '_preproc_ica_epochs.set'], 'filepath', preProcDir);
  
   % Explicit Extract epochs and rebase with the following parameters
-  % (pre-baseline, and epochs -200ms to 1000ms)
+  % (pre-baseline, and epochs -200ms to 800ms)
   EEG_expl = pop_epoch(EEG, {'expl'}, erp_range, 'epochinfo', 'yes');
   EEG_expl = eeg_checkset(EEG_expl);
   EEG_expl = pop_rmbase(EEG_expl, erp_baseline);

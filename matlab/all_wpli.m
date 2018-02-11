@@ -7,14 +7,16 @@ study = 'agency_wpli_all_chans';
 
 rootDataDir = '/Users/morteza/Desktop/sift_data';
 figuresOutputDir = [rootDataDir '/figures/' study '/'];
+outputDir = [rootDataDir '/wpli/' study '/'];
 preProcDir = [rootDataDir '/preproc/'];
-highFreq = 30;
-lowFreq = 2;
+highFreq = 45;
+lowFreq = 0.5;
 
 subjects = {'nsh', 'aka', 'ach', 'akh', 'bah', 'fhe', 'mhe', 'mkh', 'nkh', 'rho', 'rsa', 'sa1', 'sa2', 'sfa', 'sja'};
 %--------------------------------------------------
 
 mkdir(figuresOutputDir);
+mkdir(outputDir);
 
 disp(['Computing wPLIs for ' study ' study...']);
 
@@ -31,15 +33,16 @@ for sIndex = 1:numOfSubjects
   EEG = pop_loadset('filename',[subject '_preproc_ica_expl.set'],'filepath',preProcDir);
   EEG = eeg_checkset(EEG);
   exp_pli = wpli(EEG, lowFreq, highFreq, [figuresOutputDir subject '_expl']);
-
+  dlmwrite([outputDir subject '_expl.csv'], exp_pli);
   
   EEG = pop_loadset('filename',[subject '_preproc_ica_impl.set'],'filepath',preProcDir);
   imp_pli = wpli(EEG, lowFreq, highFreq, [figuresOutputDir subject '_impl']);
+  dlmwrite([outputDir subject '_impl.csv'], imp_pli);
 
   EEG = pop_loadset('filename',[subject '_preproc_ica_free.set'],'filepath',preProcDir);
   fre_pli = wpli(EEG, lowFreq, highFreq, [figuresOutputDir subject '_free']);
+  dlmwrite([outputDir subject '_free.csv'], fre_pli);
 
 end
 
-% for time I forget to do so...
-cd('/Users/morteza/workspace/agency.parser/matlab/')
+eeglab redraw;
