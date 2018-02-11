@@ -3,14 +3,14 @@
 % ------------------------------------------------
 
 % -------- Parameters ----------------------------
-study = 'agency_wpli_all_chans';
+study = 'agency_wpli_all_chans_alpha_band';
 
 rootDataDir = '/Users/morteza/Desktop/sift_data';
 figuresOutputDir = [rootDataDir '/figures/' study '/'];
 outputDir = [rootDataDir '/wpli/' study '/'];
 preProcDir = [rootDataDir '/preproc/'];
-highFreq = 45;
-lowFreq = 1;
+highFreq = 12;
+lowFreq = 8;
 
 subjects = {'nsh', 'aka', 'ach', 'akh', 'bah', 'fhe', 'mhe', 'mkh', 'nkh', 'rho', 'rsa', 'sa1', 'sa2', 'sfa', 'sja'};
 %--------------------------------------------------
