@@ -10,7 +10,7 @@ figuresOutputDir = [rootDataDir '/figures/' study '/'];
 outputDir = [rootDataDir '/wpli/' study '/'];
 preProcDir = [rootDataDir '/preproc/'];
 highFreq = 45;
-lowFreq = 0.5;
+lowFreq = 1;
 
 subjects = {'nsh', 'aka', 'ach', 'akh', 'bah', 'fhe', 'mhe', 'mkh', 'nkh', 'rho', 'rsa', 'sa1', 'sa2', 'sfa', 'sja'};
 %--------------------------------------------------
