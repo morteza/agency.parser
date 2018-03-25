@@ -1,4 +1,4 @@
-study = "agency_wpli_all_chans_alpha_band";
+study = "agency_wpli_all_chans_theta_band";
 
 library(reshape2);
 all_subjects = c("ach","aka","akh","bah","fhe","mhe","mkh","nkh","nsh","rho","rsa","sa1","sa2","sfa","sja");
